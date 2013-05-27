@@ -338,15 +338,28 @@ class PermissionsCommand implements CommandExecutor {
             if (split.length != 4) return usage(sender, command, "player setgroup");
             String player = split[2].toLowerCase();
             String[] groups = split[3].split(",");
-            
+            String[] resultgroup = new String[groups.length];
+            int i = 0;
+            for(String group : groups)
+            {
+                if (!sender.hasPermission("permissions.setgroup." + group)) {
+                    sender.sendMessage(ChatColor.RED + "You do not have permission to add players to " + ChatColor.WHITE + group + ChatColor.RED + ".");
+                    //return true;
+                }else{
+                    resultgroup[i] = group;
+                    i++;
+                }
+            }
+            if(i == 0) { return true; }
             if (plugin.getNode("users/" + player) == null) {
                 createPlayerNode(player);
             }
             
-            plugin.getNode("users/" + player).set("groups", Arrays.asList(groups));
+            
+            plugin.getNode("users/" + player).set("groups", Arrays.asList(resultgroup));
             plugin.refreshPermissions();
             
-            sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + split[3] + ChatColor.GREEN + ".");
+            sender.sendMessage(ChatColor.GREEN + "Player " + ChatColor.WHITE + player + ChatColor.GREEN + " is now in " + ChatColor.WHITE + Arrays.toString(resultgroup) + ChatColor.GREEN + ".");
             return true;
         } else if (subcommand.equals("addgroup")) {
             if (!checkPerm(sender, "player.addgroup")) return true;
